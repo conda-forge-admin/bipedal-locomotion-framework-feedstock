@@ -17,6 +17,7 @@ cmake -G "Ninja" ^
     -DFRAMEWORK_USE_UnicyclePlanner:BOOL=ON ^
     -DFRAMEWORK_USE_tomlplusplus:BOOL=ON ^
     -DFRAMEWORK_USE_PCL:BOOL=ON ^
+    -DFRAMEWORK_USE_dinrail:BOOL=ON ^
     -DFRAMEWORK_COMPILE_PYTHON_BINDINGS:BOOL=OFF ^
     -DFRAMEWORK_COMPILE_Ros1Publisher:BOOL=OFF ^
     -DFRAMEWORK_COMPILE_FloatingBaseEstimators:BOOL=ON ^
