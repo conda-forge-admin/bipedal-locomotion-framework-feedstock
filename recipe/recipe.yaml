@@ -10,6 +10,8 @@ recipe:
 source:
   url: https://github.com/gbionics/bipedal-locomotion-framework/archive/refs/tags/v${{ version }}.tar.gz
   sha256: bcb3932c3df7ee0ab2884cf3c40b845bb9443812ac4d0405926b5556c1098bf5
+  patches:
+    - patches/0001-prefer-onnxruntime-cmake-config.patch
 
 build:
   number: 1
