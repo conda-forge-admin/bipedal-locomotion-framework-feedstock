@@ -91,33 +91,30 @@ outputs:
         by_name:
           - catch2
     tests:
+      - package_contents:
+          include:
+            - BipedalLocomotion/System/Advanceable.h
+            - BipedalLocomotion/bindings/System/Advanceable.h
+          lib:
+            - BipedalLocomotionFrameworkSystem
+          # YARP plugins have no corresponding import libraries on Windows.
+          files:
+            - if: unix
+              then:
+                - lib/yarp/VectorsCollectionWrapper.so
+                - lib/yarp/YarpRobotLoggerDevice.so
+            - if: win
+              then:
+                - Library/lib/yarp/VectorsCollectionWrapper.dll
+                - Library/lib/yarp/YarpRobotLoggerDevice.dll
       - script:
-          - if: unix
-            then: test -f ${PREFIX}/include/BipedalLocomotion/System/Advanceable.h
-          - if: unix
-            then: test -f ${PREFIX}/include/BipedalLocomotion/bindings/System/Advanceable.h
-          - if: unix
-            then: test -f ${PREFIX}/lib/libBipedalLocomotionFrameworkSystem${SHLIB_EXT}
-          - if: not win
-            then: test -f ${PREFIX}/lib/cmake/BipedalLocomotionFramework/BipedalLocomotionFrameworkConfig.cmake
-          - if: unix
-            then: test -f ${PREFIX}/lib/yarp/VectorsCollectionWrapper.so
-          - if: unix
-            then: test -f ${PREFIX}/lib/yarp/YarpRobotLoggerDevice.so
-          - if: win
-            then: if not exist %PREFIX%\\Library\\include\\BipedalLocomotion\\System\\Advanceable.h exit 1
-          - if: win
-            then: if not exist %PREFIX%\\Library\\include\\BipedalLocomotion\\bindings\\System\\Advanceable.h exit 1
-          - if: win
-            then: if not exist %PREFIX%\\Library\\lib\\BipedalLocomotionFrameworkSystem.lib exit 1
-          - if: win
-            then: if not exist %PREFIX%\\Library\\bin\\BipedalLocomotionFrameworkSystem.dll exit 1
-          - if: win
-            then: if not exist %PREFIX%\\Library\\CMake\\BipedalLocomotionFrameworkConfig.cmake exit 1
-          - if: win
-            then: if not exist %PREFIX%\\Library\\lib\\yarp\\VectorsCollectionWrapper.dll exit 1
-          - if: win
-            then: if not exist %PREFIX%\\Library\\lib\\yarp\\YarpRobotLoggerDevice.dll exit 1
+          - cmake-package-check BipedalLocomotionFramework --targets BipedalLocomotion::System
+        requirements:
+          run:
+            - cmake-package-check
+            - ${{ compiler('c') }}
+            - ${{ compiler('cxx') }}
+            - cmake
 
   - package:
       name: bipedal-locomotion-framework-python
