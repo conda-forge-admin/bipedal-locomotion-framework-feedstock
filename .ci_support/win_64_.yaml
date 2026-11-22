@@ -29,7 +29,7 @@ libopencv:
 libosqp:
 - 1.0.0
 libtrintrin:
-- 0.3.0
+- '0.3'
 libyarp:
 - 3.12.3
 numpy:

@@ -35,7 +35,7 @@ libosqp:
 librealsense:
 - 2.59.2
 libtrintrin:
-- 0.3.0
+- '0.3'
 libyarp:
 - 3.12.3
 macos_machine:
