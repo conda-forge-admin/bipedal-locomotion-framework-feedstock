@@ -1,13 +1,13 @@
-DOCKER_PLATFORM:
-- linux/aarch64
+MACOSX_SDK_VERSION:
+- '11.0'
 c_compiler:
-- gcc
+- clang
 c_compiler_version:
-- '15'
+- '21'
 c_stdlib:
-- sysroot
+- macosx_deployment_target
 c_stdlib_version:
-- '2.17'
+- '11.0'
 casadi:
 - '3.7'
 channel_sources:
@@ -15,11 +15,9 @@ channel_sources:
 channel_targets:
 - conda-forge main
 cxx_compiler:
-- gxx
+- clangxx
 cxx_compiler_version:
-- '15'
-docker_image:
-- quay.io/condaforge/linux-anvil-aarch64:alma10
+- '21'
 eigen_abi_devel:
 - 5.0.1
 fmt:
@@ -35,13 +33,17 @@ libopencv:
 libosqp:
 - 1.0.0
 librealsense:
-- '2.58'
+- 2.59.2
 libtrintrin:
 - 0.3.0
 libyarp:
 - 3.12.3
+macos_machine:
+- arm64-apple-darwin20.0.0
 numpy:
 - '2'
+onnxruntime_cpp:
+- 1.32.0
 osqp_eigen:
 - '0.11'
 pcl:
@@ -56,12 +58,15 @@ pybind11_abi:
 - '11'
 python:
 - 3.11.* *_cpython
+- 3.12.* *_cpython
+- 3.13.* *_cp313
+- 3.14.* *_cp314
 qhull:
 - '2020.2'
 spdlog:
 - '1.17'
 target_platform:
-- linux-aarch64
+- osx-arm64
 vtk:
 - 9.7.0
 zip_keys:
