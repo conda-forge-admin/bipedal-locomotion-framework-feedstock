@@ -1,8 +1,6 @@
 schema_version: 1
 
 context:
-  namecxx: libbipedal-locomotion-framework
-  namepython: bipedal-locomotion-framework-python
   version: "0.30.0"
 
 recipe:
@@ -85,7 +83,7 @@ outputs:
         - liblie-group-controllers
         - tomlplusplus
       run_exports:
-        - ${{ pin_subpackage(namecxx, upper_bound='x.x.x') }}
+        - ${{ pin_subpackage('libbipedal-locomotion-framework', upper_bound='x.x.x') }}
       ignore_run_exports:
         # catch2 is used just for tests, we do not actually link the C++ library
         by_name:
@@ -145,7 +143,7 @@ outputs:
         - if: build_platform != target_platform and not ppc64le
           then: qt6-main
       host:
-        - ${{ pin_subpackage(namecxx, exact=True) }}
+        - ${{ pin_subpackage('libbipedal-locomotion-framework', exact=True) }}
         - python
         - pybind11
         - pybind11-abi
@@ -175,7 +173,7 @@ outputs:
         - manifpy  # Requested just for tests
         - numpy
       run:
-        - ${{ pin_subpackage(namecxx, exact=True) }}
+        - ${{ pin_subpackage('libbipedal-locomotion-framework', exact=True) }}
         - python
         - manifpy
         - idyntree
@@ -199,10 +197,10 @@ outputs:
       name: bipedal-locomotion-framework
     requirements:
       run:
-        - ${{ pin_subpackage(namecxx, exact=True) }}
-        - ${{ pin_subpackage(namepython, upper_bound='x.x.x') }}
+        - ${{ pin_subpackage('libbipedal-locomotion-framework', exact=True) }}
+        - ${{ pin_subpackage('bipedal-locomotion-framework-python', upper_bound='x.x.x') }}
       run_exports:
-        - ${{ pin_subpackage(namecxx, upper_bound='x.x.x') }}
+        - ${{ pin_subpackage('libbipedal-locomotion-framework', upper_bound='x.x.x') }}
     tests:
       - python:
           imports:
