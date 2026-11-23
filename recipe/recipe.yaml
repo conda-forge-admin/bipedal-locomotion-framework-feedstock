@@ -1,0 +1,241 @@
+schema_version: 1
+
+context:
+  version: "0.30.0"
+
+recipe:
+  name: bipedal-locomotion-framework-split
+  version: ${{ version }}
+
+source:
+  url: https://github.com/gbionics/bipedal-locomotion-framework/archive/refs/tags/v${{ version }}.tar.gz
+  sha256: bcb3932c3df7ee0ab2884cf3c40b845bb9443812ac4d0405926b5556c1098bf5
+  patches:
+    - patches/0001-prefer-onnxruntime-cmake-config.patch
+
+build:
+  number: 1
+  # onnxruntime dropped Intel macOS support: https://github.com/conda-forge/onnxruntime-feedstock/pull/206
+  skip: osx and x86_64
+
+outputs:
+  - package:
+      name: libbipedal-locomotion-framework
+    build:
+      script:
+        - if: unix
+          then: build_cxx.sh
+        - if: win
+          then: bld_cxx.bat
+    requirements:
+      build:
+        - ${{ compiler('c') }}
+        - ${{ stdlib("c") }}
+        - ${{ compiler('cxx') }}
+        - cmake
+        - pkgconf
+        - ninja
+        # YARP idl tools are used in this recipe
+        - if: build_platform != target_platform
+          then: libyarp
+        # PCL requires Qt's tools
+        - if: build_platform != target_platform and not ppc64le
+          then: qt6-main
+      host:
+        - eigen
+        - eigen-abi-devel
+        - idyntree
+        - manif
+        - libyarp
+        - libdinrail
+        - tomlplusplus
+        - librobometry
+        - fmt
+        - spdlog
+        - cppad
+        - manif
+        - nlohmann_json
+        - libosqp
+        - osqp-eigen
+        - libmatio-cpp
+        - tomlplusplus
+        - casadi
+        - qhull
+        - libopencv
+        - pcl
+        - onnxruntime-cpp
+        - tiny-process-library
+        - libtrintrin
+        - if: linux
+          then: libgl-devel
+        # Only required for testing
+        - catch2
+        # transitive public dependency of pcl
+        - vtk
+        - liblie-group-controllers
+        - libunicycle-footstep-planner
+        - if: not win
+          then: librealsense
+        - if: linux
+          then: xorg-libxfixes
+        - eigen-abi-devel
+      run:
+        # manif and eigen are mentioned in the headers so needed when building
+        # against libbipedal-locomotion-framework
+        - manif
+        - eigen
+        - liblie-group-controllers
+        - tomlplusplus
+      run_exports:
+        - ${{ pin_subpackage('libbipedal-locomotion-framework', upper_bound='x.x.x') }}
+      ignore_run_exports:
+        # catch2 is used just for tests, we do not actually link the C++ library
+        by_name:
+          - catch2
+    tests:
+      - package_contents:
+          include:
+            - BipedalLocomotion/System/Advanceable.h
+            - BipedalLocomotion/bindings/System/Advanceable.h
+          lib:
+            - BipedalLocomotionFrameworkSystem
+          # YARP plugins have no corresponding import libraries on Windows.
+          files:
+            - if: unix
+              then:
+                - lib/yarp/VectorsCollectionWrapper.so
+                - lib/yarp/YarpRobotLoggerDevice.so
+            - if: win
+              then:
+                - Library/lib/yarp/VectorsCollectionWrapper.dll
+                - Library/lib/yarp/YarpRobotLoggerDevice.dll
+      - script:
+          - cmake-package-check BipedalLocomotionFramework --targets BipedalLocomotion::System
+        requirements:
+          run:
+            - cmake-package-check
+            - ${{ compiler('c') }}
+            - ${{ compiler('cxx') }}
+            - cmake
+
+  - package:
+      name: bipedal-locomotion-framework-python
+    build:
+      script:
+        - if: unix
+          then: build_py.sh
+        - if: win
+          then: bld_py.bat
+    requirements:
+      build:
+        - ${{ compiler('c') }}
+        - ${{ stdlib("c") }}
+        - ${{ compiler('cxx') }}
+        - pybind11
+        - pybind11-abi
+        - ninja
+        - cmake
+        - if: build_platform != target_platform
+          then: python
+        - if: build_platform != target_platform
+          then: cross-python_${{ target_platform }}
+        - if: build_platform != target_platform
+          then: pybind11
+        - if: build_platform != target_platform
+          then: pybind11-abi
+        # PCL requires Qt's tools
+        - if: build_platform != target_platform and not ppc64le
+          then: qt6-main
+      host:
+        - ${{ pin_subpackage('libbipedal-locomotion-framework', exact=True) }}
+        - python
+        - pybind11
+        - pybind11-abi
+        - liblie-group-controllers
+        - libyarp
+        - libdinrail
+        - tomlplusplus
+        - idyntree
+        - fmt
+        - spdlog
+        - libopencv
+        # Workaround for https://github.com/conda-forge/bipedal-locomotion-framework-feedstock/issues/37
+        - libmatio-cpp
+        # Workaround for https://github.com/conda-forge/bipedal-locomotion-framework-feedstock/pull/42#issuecomment-1804057782
+        - casadi
+        - libboost-devel
+        - pugixml
+        - pcl
+        - eigen-abi-devel
+        - if: linux
+          then: libgl-devel
+        - if: linux
+          then: xorg-libxfixes
+        - icub-models  # Requested just for tests
+        - scipy  # Requested just for tests
+        - pytest  # Requested just for tests
+        - manifpy  # Requested just for tests
+        - numpy
+      run:
+        - ${{ pin_subpackage('libbipedal-locomotion-framework', exact=True) }}
+        - python
+        - manifpy
+        - idyntree
+      ignore_run_exports:
+        # icub-models is used just for tests, we do not actually link the C++ library
+        by_name:
+          - icub-models
+    tests:
+      - python:
+          imports:
+            - bipedal_locomotion_framework
+          pip_check: true
+      - requirements:
+          run:
+            - pip
+        script:
+          - if: unix
+            then: test $(pip list | grep bipedal_locomotion_framework | tr -s " " | grep $PKG_VERSION | wc -l) -eq 1
+
+  - package:
+      name: bipedal-locomotion-framework
+    requirements:
+      run:
+        - ${{ pin_subpackage('libbipedal-locomotion-framework', exact=True) }}
+        - ${{ pin_subpackage('bipedal-locomotion-framework-python', upper_bound='x.x.x') }}
+      run_exports:
+        - ${{ pin_subpackage('libbipedal-locomotion-framework', upper_bound='x.x.x') }}
+    tests:
+      - python:
+          imports:
+            - bipedal_locomotion_framework
+            - bipedal_locomotion_framework.bindings.contacts
+            - bipedal_locomotion_framework.bindings.continuous_dynamical_system
+            - bipedal_locomotion_framework.bindings.conversions
+            - bipedal_locomotion_framework.bindings.floating_base_estimators
+            - bipedal_locomotion_framework.bindings.ik
+            - bipedal_locomotion_framework.bindings.math
+            - bipedal_locomotion_framework.bindings.ml
+            - bipedal_locomotion_framework.bindings.parameters_handler
+            - bipedal_locomotion_framework.bindings.planners
+            - bipedal_locomotion_framework.bindings.reduced_model_controllers
+            - bipedal_locomotion_framework.bindings.robot_interface
+            - bipedal_locomotion_framework.bindings.simplified_model_controllers
+            - bipedal_locomotion_framework.bindings.system
+            - bipedal_locomotion_framework.bindings.text_logging
+            - bipedal_locomotion_framework.bindings.tsid
+            - bipedal_locomotion_framework.bindings.yarp_utilities
+          pip_check: false
+
+about:
+  license: BSD-3-Clause
+  license_file:
+    - LICENSE
+  summary: Suite of libraries for achieving bipedal locomotion on humanoid robots.
+  homepage: https://github.com/gbionics/bipedal-locomotion-framework
+
+extra:
+  feedstock-name: bipedal-locomotion-framework
+  recipe-maintainers:
+    - traversaro
+    - GiulioRomualdi
